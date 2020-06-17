@@ -6,9 +6,10 @@ import fire
 import pandas as pd
 
 from binance import Binance
-from fetcher import Fetcher
-from util import update_data, send_dingding_msg
 from config import DATA_DIR
+from fetcher import Fetcher
+from okex import Okex
+from util import send_dingding_msg, update_data
 
 logging.basicConfig(format='%(asctime)s (%(levelname)s) - %(message)s', level=logging.INFO, datefmt='%Y%m%d %H:%M:%S')
 
@@ -16,6 +17,7 @@ logging.basicConfig(format='%(asctime)s (%(levelname)s) - %(message)s', level=lo
 class Main:
     def __init__(self, use_proxy=False):
         self.binance = Binance(use_proxy)
+        self.okex = Okex(use_proxy)
 
     def fetch(self,
               exchange_name,
@@ -36,9 +38,10 @@ class Main:
             logging.info(f'Fetching {date.strftime("%Y%m%d")}')
             for _, row in symbols.iterrows():
                 df = None
+                df = exchange.fetch_candle(row['id'], date, timeframe, row['type'])
                 for _ in range(3):
                     try:
-                        df = exchange.fetch_candle(row['symbol'], date, timeframe)
+                        df = exchange.fetch_candle(row['id'], date, timeframe, row['type'])
                         break
                     except:
                         logging.error(f"Failed to fetch {date.strftime('%Y%m%d')} {row['symbol']} {row['type']}")

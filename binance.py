@@ -18,27 +18,18 @@ class Binance(Fetcher):
     def __init__(self, use_proxy):
         super().__init__(ccxt.binance, use_proxy)
 
-    def fetch_candle(self, symbol: str, date: datetime, timeframe: str) -> pd.DataFrame:
-        last_end_time = date.replace(hour=0, minute=0, second=0)
-        dfs = []
-        while last_end_time < date + timedelta(hours=24):
-            data = self.exchange.publicGetKlines({
-                'symbol': symbol.replace('/', ''),
+    def request_candle(self, symbol: str, start_time: datetime, timeframe: str, symbol_type: str) -> pd.DataFrame:
+        data = self.exchange.publicGetKlines({
+                'symbol': symbol,
                 'interval': timeframe,
-                'startTime': int(last_end_time.replace(tzinfo=pytz.utc).timestamp()) * 1000,
-                'limit': self.max_candles_per_request
+                'startTime': int(start_time.replace(tzinfo=pytz.utc).timestamp()) * 1000,
+                'limit': self.max_candles_per_request(symbol_type)
             })
-            df = pd.DataFrame(data, columns=COLUMN_NAMS).drop(columns='_')
-            df['candle_begin_time'] = pd.to_datetime(df['candle_begin_time'], unit='ms')
-            df['candle_close_time'] = pd.to_datetime(df['candle_close_time'], unit='ms')
-
-            dfs.append(df)
-            last_end_time = df.iloc[-1]['candle_begin_time']
-        df = pd.concat(dfs).drop_duplicates('candle_begin_time')
-        df = df[df['candle_begin_time'] < date + timedelta(hours=24)]
+        df = pd.DataFrame(data, columns=COLUMN_NAMS).drop(columns='_')
+        df['candle_begin_time'] = pd.to_datetime(df['candle_begin_time'], unit='ms')
+        df['candle_close_time'] = pd.to_datetime(df['candle_close_time'], unit='ms')
         return df
 
-    @property
-    def max_candles_per_request(self):
+    def max_candles_per_request(self, symbol_type):
         return 1000
 

@@ -5,6 +5,7 @@ import json
 import os
 import time
 import urllib.parse
+from datetime import timedelta
 
 import pandas as pd
 import requests
@@ -39,3 +40,17 @@ def update_data(path, df):
         df_ret = df
     df_ret = df_ret.sort_index()
     df_ret.to_hdf(path, 'data')
+
+
+def get_timeframe_delta(timeframe: str) -> timedelta:
+    qty = int(timeframe[:-1])
+    if timeframe[-1] == 'm':
+        return timedelta(minutes=qty)
+    elif timeframe[-1] == 'h':
+        return timeframe(hours=qty)
+    elif timeframe[-1] == 'd':
+        return timeframe(days=qty)
+    elif timeframe[-1] == 's':
+        return timeframe(seconds=qty)
+    else:
+        raise RuntimeError(f'Unknown timeframe {timeframe}')
