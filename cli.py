@@ -38,7 +38,6 @@ class Main:
             logging.info(f'Fetching {date.strftime("%Y%m%d")}')
             for _, row in symbols.iterrows():
                 df = None
-                df = exchange.fetch_candle(row['id'], date, timeframe, row['type'])
                 for _ in range(3):
                     try:
                         df = exchange.fetch_candle(row['id'], date, timeframe, row['type'])
@@ -48,7 +47,7 @@ class Main:
                         time.sleep(1)
                 if df is None:
                     fails.append(f"{date.strftime('%Y%m%d')} {row['symbol']} {row['type']}")
-                else:
+                elif not df.empty:
                     hdf_dir = os.path.join(DATA_DIR, exchange_name, row['type'], date.strftime('%Y%m%d'))
                     os.makedirs(hdf_dir, exist_ok=True)
                     hdf_path = os.path.join(hdf_dir, f'{row["symbol"].replace("/", "-")}_{timeframe}.hdf')

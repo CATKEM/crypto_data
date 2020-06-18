@@ -34,6 +34,8 @@ class Fetcher(ABC):
             df.sort_values('candle_begin_time', inplace=True)
             start_time = df.iloc[-1]['candle_begin_time'] + timeframe_dlt
             dfs.append(df)
+        if not dfs:
+            return pd.DataFrame()
         df = pd.concat(dfs).drop_duplicates('candle_begin_time')
         df = df[df['candle_begin_time'] < date + timedelta(hours=24)]
         return df
