@@ -1,3 +1,4 @@
+import glob
 import logging
 import os
 import time
@@ -62,5 +63,19 @@ class Main:
             msg = f'Successfully fetched {exchange_name} {begin_date} {end_date} {timeframe} data'
         send_dingding_msg(msg)
 
+    def convert_csv_to_hdf(self, exchange, symbol_type, begin_date, end_date=None, skiprows=0):
+        if end_date is None:
+            end_date = begin_date
+        begin_date, end_date = pd.to_datetime(str(begin_date)), pd.to_datetime(str(end_date))
+        dates = os.listdir(os.path.join(DATA_DIR, exchange, symbol_type))
+        dates = sorted(d for d in dates if begin_date <= pd.to_datetime(d) <= end_date)
+        for date in dates:
+            logging.info(f'Converting {date}')
+            paths = glob.glob(os.path.join(DATA_DIR, exchange, symbol_type, date, '*.csv'))
+            for path in paths:
+                df = pd.read_csv(path, skiprows=skiprows)
+                df['candle_begin_time'] = pd.to_datetime(df['candle_begin_time'])
+                hdf_path = f'{path[:-4]}.hdf'
+                update_data(hdf_path, df.set_index('candle_begin_time'))
 
 fire.Fire(Main)
