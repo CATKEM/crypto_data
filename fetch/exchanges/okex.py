@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 import ccxt
 import pandas as pd
 
-from fetcher import Fetcher
+from fetch.fetcher import Fetcher
 from util import get_timeframe_delta
 
 SPOT_COLUMNS = ['candle_begin_time', 'open', 'high', 'low', 'close', 'volume']
@@ -18,13 +18,12 @@ MAX_CANDLES = {'spot': 200, 'futures': 300, 'swap': 200}
 
 class Okex(Fetcher):
     def __init__(self, use_proxy):
-        super().__init__(ccxt.okex, use_proxy)
+        super().__init__(ccxt.okex, use_proxy, 'okex')
 
     def request_candle(self, symbol: str, start_time: datetime, timeframe: str, symbol_type: str) -> pd.DataFrame:
         columns = SPOT_COLUMNS if symbol_type == 'spot' else FUTURES_COLUMNS
         max_candles_req = self.max_candles_per_request(symbol_type)
         getter = getattr(self.exchange, f'{symbol_type}GetInstrumentsInstrumentIdCandles')
-        dfs = []
         timeframe_dlt = get_timeframe_delta(timeframe)
         end_time = start_time + timeframe_dlt * (max_candles_req - 1)
         data = getter({
