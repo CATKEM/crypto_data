@@ -23,7 +23,7 @@ class Okex(Fetcher):
     def request_candle(self, symbol: str, start_time: datetime, timeframe: str, symbol_type: str) -> pd.DataFrame:
         columns = SPOT_COLUMNS if symbol_type == 'spot' else FUTURES_COLUMNS
         max_candles_req = self.max_candles_per_request(symbol_type)
-        getter = getattr(self.exchange, f'{symbol_type}GetInstrumentsInstrumentIdCandles')
+        getter = getattr(self.exchange, f'{symbol_type}GetInstrumentsInstrumentIdHistoryCandles')
         timeframe_dlt = get_timeframe_delta(timeframe)
         end_time = start_time + timeframe_dlt * (max_candles_req - 1)
         data = getter({

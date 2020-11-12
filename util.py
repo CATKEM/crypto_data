@@ -31,7 +31,7 @@ def send_dingding_msg(msg):
 
 def update_data(path, df):
     if os.path.exists(path):
-        df_old = pd.read_hdf(path)
+        df_old = pd.read_pickle(path)
         intersection = df_old.index.intersection(df.index)
         if not intersection.empty:
             df_old.drop(df_old.index.intersection(df.index), inplace=True)
@@ -39,7 +39,7 @@ def update_data(path, df):
     else:
         df_ret = df
     df_ret = df_ret.sort_index()
-    df_ret.to_hdf(path, 'data')
+    df_ret.to_pickle(path)
 
 
 def get_timeframe_delta(timeframe: str) -> timedelta:
@@ -47,10 +47,10 @@ def get_timeframe_delta(timeframe: str) -> timedelta:
     if timeframe[-1] == 'm':
         return timedelta(minutes=qty)
     elif timeframe[-1] == 'h':
-        return timeframe(hours=qty)
+        return timedelta(hours=qty)
     elif timeframe[-1] == 'd':
-        return timeframe(days=qty)
+        return timedelta(days=qty)
     elif timeframe[-1] == 's':
-        return timeframe(seconds=qty)
+        return timedelta(seconds=qty)
     else:
         raise RuntimeError(f'Unknown timeframe {timeframe}')

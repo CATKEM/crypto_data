@@ -14,7 +14,7 @@ from fetch import Fetcher
 
 from config import DATA_DIR
 from util import send_dingding_msg, update_data
-from convert import convert_csv_to_hdf, merge_hdfs
+from convert import convert_pkl, merge_pkls
 
 logging.basicConfig(format='%(asctime)s (%(levelname)s) - %(message)s', level=logging.INFO, datefmt='%Y%m%d %H:%M:%S')
 
@@ -47,12 +47,12 @@ class Main:
         exchange: Fetcher = getattr(module, exchange_name.capitalize())(use_proxy)
         exchange.fetch(timeframe, begin_date, end_date, base_currencies, quote_currencies, symbol_types)
 
-    def convert_csv_to_hdf(self, exchange, symbol_type, begin_date, end_date=None, skiprows=0):
+    def convert_pkl(self, exchange, symbol_type, begin_date, end_date=None, skiprows=0):
         begin_date, end_date = self.get_begin_end_dates(begin_date, end_date)
-        convert_csv_to_hdf(exchange, symbol_type, begin_date, end_date, skiprows)
+        convert_pkl(exchange, symbol_type, begin_date, end_date, skiprows)
 
-    def merge_hdfs(self, exchange, symbol_type):
-        merge_hdfs(exchange, symbol_type)
+    def merge_pkls(self, exchange, symbol_type):
+        merge_pkls(exchange, symbol_type)
 
 
 fire.Fire(Main)
